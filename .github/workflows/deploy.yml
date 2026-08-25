@@ -46,9 +46,12 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 既存のJavaプロセスを終了させる
-            pkill -f 'java -jar' || true
+            # 1. 古いアプリを瞬殺してメモリを即座に空ける (-9 を追加)
+            pkill -9 -f 'java -jar' || true
             sleep 5
-            # 入力を完全に遮断してバックグラウンド起動し、即座にSSHを抜ける
-            nohup java -jar /home/ubuntu/*-SNAPSHOT.jar > /home/ubuntu/app.log 2>&1 < /dev/null &
-            exit 0
+            
+            # 2. 確実にホームディレクトリへ移動
+            cd /home/ubuntu
+            
+            # 3. メモリ上限(256MB)を設けて安全にバックグラウンド起動
+            nohup java -Xmx256m -jar $(ls *-SNAPSHOT.jar | tail -n 1) > app.log 2>&1 < /dev/null &
