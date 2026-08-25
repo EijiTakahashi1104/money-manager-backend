@@ -49,5 +49,6 @@ jobs:
             # 既存のJavaプロセスを終了させる
             pkill -f 'java -jar' || true
             sleep 5
-            # 新しいアプリをバックグラウンドで起動
-            nohup java -jar /home/ubuntu/*-SNAPSHOT.jar > /home/ubuntu/app.log 2>&1 &
+            # 入力を完全に遮断してバックグラウンド起動し、即座にSSHを抜ける
+            nohup java -jar /home/ubuntu/*-SNAPSHOT.jar > /home/ubuntu/app.log 2>&1 < /dev/null &
+            exit 0
