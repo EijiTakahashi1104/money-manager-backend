@@ -1,0 +1,53 @@
+name: Deploy Backend to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 最新のコードを取得
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Java(JDK) 17の環境を準備
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. ビルド実行権限の付与とビルド
+      - name: Build with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew build -x test
+
+      # 4. EC2へ作成したjarファイルを転送
+      - name: Copy jar to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "build/libs/*-SNAPSHOT.jar"
+          target: "/home/ubuntu"
+          strip_components: 2
+
+      # 5. EC2内でアプリを再起動
+      - name: Restart application on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # 既存のJavaプロセスを終了させる
+            pkill -f 'java -jar' || true
+            sleep 5
+            # 新しいアプリをバックグラウンドで起動
+            nohup java -jar /home/ubuntu/*-SNAPSHOT.jar > /home/ubuntu/app.log 2>&1 &
