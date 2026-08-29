@@ -13,6 +13,10 @@ public class MonthlyBudget {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ★追加: どのカテゴリに対する予算かを紐付ける
+    @Column(name = "category_id", nullable = false)
+    private Long categoryId;
+
     @Column(name = "year_month", nullable = false, length = 7)
     private String yearMonth;
 

@@ -53,6 +53,6 @@ jobs:
             # 2. 確実にホームディレクトリへ移動
             cd /home/ubuntu
             
-            # 3. メモリ上限を設けて安全にバックグラウンド起動
-            nohup java -Xmx256m -jar money-manager-api-0.0.1-SNAPSHOT.jar > app.log 2>&1 < /dev/null &
+            # 3. ★ここに --spring.profiles.active=prod を追加！
+            nohup java -Xmx256m -jar money-manager-api-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod > app.log 2>&1 < /dev/null &
             exit 0
