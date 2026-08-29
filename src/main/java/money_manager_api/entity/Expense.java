@@ -17,8 +17,8 @@ public class Expense {
     @Column(length = 256, nullable = false)
     private String title;
 
-    @Column(length = 50, nullable = false)
-    private String category;
+    @Column(name = "category_id", nullable = false)
+    private Integer categoryId;
 
     @Column(nullable = false)
     private BigDecimal amount;

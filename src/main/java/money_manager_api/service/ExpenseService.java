@@ -62,7 +62,7 @@ public class ExpenseService {
     public Expense updateExpense(Long id, Expense updatedExpense) {
         return expenseRepository.findById(id).map(expense -> {
             expense.setTitle(updatedExpense.getTitle());
-            expense.setCategory(updatedExpense.getCategory());
+            expense.setCategoryId(updatedExpense.getCategoryId());
             expense.setAmount(updatedExpense.getAmount());
             expense.setExpenseDate(updatedExpense.getExpenseDate());
             expense.setMemo(updatedExpense.getMemo());

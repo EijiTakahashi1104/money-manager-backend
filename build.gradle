@@ -33,3 +33,8 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// コンパイル時の文字コードをUTF-8に強制する設定
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
