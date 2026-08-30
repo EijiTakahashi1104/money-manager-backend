@@ -78,4 +78,41 @@ public class ExpenseService {
     public List<Expense> getExpensesByMonth(String yearMonth) {
         return expenseRepository.findByYearMonth(yearMonth);
     }
+
+    // ★ 検索ロジック（修正）
+    public List<Expense> searchExpenses(String monthStr, Integer categoryId, String keyword) {
+        // キーワードが空なら null に、ある場合は前後に "%" を付ける
+        String searchKeyword = (keyword != null && !keyword.trim().isEmpty())
+                ? "%" + keyword + "%"
+                : null;
+        return expenseRepository.searchExpenses(monthStr, categoryId, searchKeyword);
+    }
+
+    // ★ CSV生成ロジック
+    public byte[] exportCsv(String monthStr, Integer categoryId, String keyword) {
+        List<Expense> expenses = searchExpenses(monthStr, categoryId, keyword);
+
+        StringBuilder csvBuilder = new StringBuilder();
+        csvBuilder.append("日付,カテゴリID,内容,金額,メモ\n");
+
+        for (Expense e : expenses) {
+            String safeMemo = e.getMemo() != null ? e.getMemo().replace("\"", "\"\"") : ""; // ダブルクォートのエスケープ
+
+            csvBuilder.append("\"").append(e.getExpenseDate()).append("\",")
+                    .append("\"").append(e.getCategoryId()).append("\",")
+                    .append("\"").append(e.getTitle()).append("\",")
+                    .append("\"").append(e.getAmount()).append("\",")
+                    .append("\"").append(safeMemo).append("\"\n");
+        }
+
+        // Excel文字化け防止のBOM (EF BB BF)
+        byte[] bom = new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF};
+        byte[] csvBytes = csvBuilder.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        byte[] result = new byte[bom.length + csvBytes.length];
+        System.arraycopy(bom, 0, result, 0, bom.length);
+        System.arraycopy(csvBytes, 0, result, bom.length, csvBytes.length);
+
+        return result;
+    }
 }
