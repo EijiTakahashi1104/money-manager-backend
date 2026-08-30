@@ -2,6 +2,9 @@ package money_manager_api.controller;
 
 import money_manager_api.entity.Expense;
 import money_manager_api.service.ExpenseService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -80,5 +83,29 @@ public class ExpenseController {
     @GetMapping("/month/{yearMonth}")
     public List<Expense> getExpensesByMonth(@PathVariable String yearMonth) {
         return expenseService.getExpensesByMonth(yearMonth);
+    }
+
+    // ★ 検索API
+    @GetMapping("/search")
+    public List<Expense> search(
+            @RequestParam String monthStr,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) String keyword) {
+        return expenseService.searchExpenses(monthStr, categoryId, keyword);
+    }
+
+    // ★ CSVダウンロードAPI
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportCsv(
+            @RequestParam String monthStr,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) String keyword) {
+
+        byte[] csvData = expenseService.exportCsv(monthStr, categoryId, keyword);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=expenses_" + monthStr + ".csv")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(csvData);
     }
 }

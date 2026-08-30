@@ -15,4 +15,17 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
      */
     @Query("SELECT e FROM Expense e WHERE CAST(e.expenseDate AS string) LIKE :yearMonth%")
     List<Expense> findByYearMonth(@Param("yearMonth") String yearMonth);
+
+    /**
+     * 【修正】月、カテゴリ、キーワードによる絞り込み検索
+     */
+    @Query("SELECT e FROM Expense e WHERE CAST(e.expenseDate AS string) LIKE CONCAT(:monthStr, '%') " +
+            "AND (:categoryId IS NULL OR e.categoryId = :categoryId) " +
+            "AND (:keyword IS NULL OR e.title LIKE :keyword OR e.memo LIKE :keyword) " +
+            "ORDER BY e.expenseDate DESC")
+    List<Expense> searchExpenses(
+            @Param("monthStr") String monthStr,
+            @Param("categoryId") Integer categoryId,
+            @Param("keyword") String keyword
+    );
 }
